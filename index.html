@@ -165,25 +165,26 @@
       const kykyHigh = kykyScore >= 30;
       let profile = "";
       if (haluHigh && kykyHigh) {
-        profile = `<span class="highlight">Olet strateginen edelläkävijä</span><br>
-        Näkee tulevaisuuden mahdollisuudet ja pystyy toteuttamaan ne.<br>
-        Uskaltaa investoida, uudistaa ja kansainvälistyä.<br>
-        Hyvässä asemassa nopeaan kasvuun ja suunnannäyttäjän rooliin.`;
-      } else if (haluHigh && !kykyHigh) {
-        profile = `<span class="highlight">Olet innostunut uudistuja</span><br>
-        Erittäin motivoitunut, mutta resurssit ja osaaminen eivät vielä riitä.<br>
-        Tarvitsee tukea liiketoimintaosaamisen, rahoituksen ja verkostojen rakentamiseen.<br>
-        Potentiaalia kasvaa edelläkävijäksi.`;
-      } else if (!haluHigh && kykyHigh) {
-        profile = `<span class="highlight">Olet vakaa kehittäjä</span><br>
-        Kyvykäs ja hyvin resursoitu, mutta etenee harkiten ja riskit välttäen.<br>
-        Hyvä perusta, mutta tarvitsee usein ulkoisia kannustimia aktivoituakseen uusiin avauksiin.`;
-      } else {
-        profile = `<span class="highlight">Olet varautunut säilyttäjä</span><br>
-        Keskittyy pitämään nykytoiminnan vakaana ja riskittömänä.<br>
-        Saattaa suhtautua muutoksiin varauksella tai kokea ne uhkana.<br>
-        Voi tarvita aikaa, tukea ja luottamusta, jotta uskaltaa lähteä liikkeelle.`;
-      }
+  profile = `<span class="highlight">Strateginen edelläkävijä</span><br>
+  Näkee tulevaisuuden mahdollisuudet ja pystyy toteuttamaan ne.<br>
+  Uskaltaa investoida, uudistaa ja kansainvälistyä.<br>
+  Hyvässä asemassa nopeaan kasvuun ja suunnannäyttäjän rooliin.`;
+} else if (haluHigh && !kykyHigh) {
+  profile = `<span class="highlight">Innostunut uudistuja</span><br>
+  Erittäin motivoitunut, mutta resurssit ja osaaminen eivät vielä riitä.<br>
+  Tarvitsee tukea liiketoimintaosaamisen, rahoituksen ja verkostojen rakentamiseen.<br>
+  Potentiaalia kasvaa edelläkävijäksi.`;
+} else if (!haluHigh && kykyHigh) {
+  profile = `<span class="highlight">Vakaa kehittäjä</span><br>
+  Kyvykäs ja hyvin resursoitu, mutta etenee harkiten ja riskit välttäen.<br>
+  Hyvä perusta, mutta tarvitsee usein ulkoisia kannustimia aktivoituakseen uusiin avauksiin.`;
+} else {
+  profile = `<span class="highlight">Varautunut säilyttäjä</span><br>
+  Keskittyy pitämään nykytoiminnan vakaana ja riskittömänä.<br>
+  Saattaa suhtautua muutoksiin varauksella tai kokea ne uhkana.<br>
+  Voi tarvita aikaa, tukea ja luottamusta, jotta uskaltaa lähteä liikkeelle.`;
+}
+
 
       document.getElementById("result").style.display = "block";
       document.getElementById("profileText").innerHTML =
