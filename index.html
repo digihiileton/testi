@@ -1,10 +1,167 @@
 <!DOCTYPE html>
+<html lang="fi">
 <head>
-  
+  <meta charset="UTF-8">
+  <title>Halu & Kyky -testi</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; line-height: 1.5; }
+    h1 { margin-bottom: 20px; }
+    .question { margin-bottom: 20px; padding: 10px; border-bottom: 1px solid #ddd; }
+    .scale label { margin: 0 10px; }
+    button { margin-top: 20px; padding: 10px 20px; font-size: 16px; cursor: pointer; }
+    #result { margin-top: 30px; padding: 20px; border: 2px solid #333; border-radius: 10px; }
+    .highlight { font-weight: bold; font-size: 1.2em; color: darkblue; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 5px;
+      margin-top: 5px;
+    }
+    .grid label { text-align: center; }
+    canvas { margin-top: 20px; max-width: 500px; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-
 <body>
-<h1>TESTIOTSIKKO</h1>
-  
+
+  <h1>Halu & Kyky -testi</h1>
+  <form id="testForm"></form>
+  <button type="button" id="submitBtn">Näytä tulos</button>
+
+  <div id="result" style="display:none;">
+    <div id="profileText"></div>
+    <canvas id="chartCanvas"></canvas>
+  </div>
+
+  <script>
+    const questions = [
+      // HALU
+      { text: "Seuraan aktiivisesti matkailualan trendejä ja pohdin niiden vaikutuksia yritykseeni.", type: "halu" },
+      { text: "Minua motivoi ajatus siitä, että voin olla mukana rakentamassa matkailun tulevaisuutta.", type: "halu" },
+      { text: "Haluan tunnistaa heikkoja signaaleja ja ennakoida asiakkaiden muuttuvia tarpeita.", type: "halu" },
+      { text: "Olen valmis muuttamaan toimintatapoja, jos se tukee yrityksen tulevaisuutta.", type: "halu" },
+      { text: "Koen, että muutokset ovat mahdollisuus, eivät uhka.", type: "halu" },
+      { text: "Olen valmis luopumaan vanhoista käytännöistä, jos ne eivät enää palvele liiketoimintaa.", type: "halu" },
+      { text: "Olen valmis sijoittamaan aikaa, rahaa ja resursseja tulevaisuuden kannalta tärkeisiin uudistuksiin.", type: "halu" },
+      { text: "Näen investoinnit tulevaisuuteen pitkän aikavälin menestyksen edellytyksenä.", type: "halu" },
+      { text: "Haluan kehittää uusia tuotteita ja palveluja, vaikka niistä ei heti syntyisi tuottoa.", type: "halu" },
+      { text: "Olen halukas tekemään yhteistyötä muiden matkailutoimijoiden kanssa tulevaisuuden rakentamiseksi.", type: "halu" },
+      { text: "Arvostan yhteiskehittämistä ja asiakkaiden osallistamista palvelujen suunnitteluun.", type: "halu" },
+      { text: "Uskon, että tulevaisuudessa menestyminen vaatii vahvoja verkostoja ja kumppanuuksia.", type: "halu" },
+
+      // KYKY
+      { text: "Yritykselläni on käytössä työkaluja tai prosesseja, joilla seuraamme alan kehitystä ja trendejä.", type: "kyky" },
+      { text: "Meillä on aikaa ja resursseja tulevaisuuden suunnitteluun ja ennakointiin.", type: "kyky" },
+      { text: "Meillä on osaamista analysoida markkinoiden muutoksia ja sovittaa toimintaa sen mukaan.", type: "kyky" },
+      { text: "Yrityksessämme on joustavat rakenteet ja prosessit, jotka mahdollistavat nopean suunnanmuutoksen.", type: "kyky" },
+      { text: "Pystymme kouluttamaan henkilöstöä tai hankkimaan osaamista muutostarpeiden tueksi.", type: "kyky" },
+      { text: "Olemme aiemminkin onnistuneet muuttamaan liiketoimintaamme muuttuvien olosuhteiden mukaan.", type: "kyky" },
+      { text: "Yritykselläni on riittävät taloudelliset resurssit tarvittaviin investointeihin.", type: "kyky" },
+      { text: "Meillä on osaamista ja kykyä hakea rahoitusta kehittämis- ja kasvuhankkeisiin.", type: "kyky" },
+      { text: "Yritykselläni on toimivat rakenteet, jotka tukevat kasvua ja uudistumista.", type: "kyky" },
+      { text: "Yritykselläni on valmiita verkostoja ja kumppaneita, joiden kanssa voimme kehittää toimintaa.", type: "kyky" },
+      { text: "Meillä on käytännöt, jotka tukevat avointa vuorovaikutusta muiden toimijoiden kanssa.", type: "kyky" },
+      { text: "Yrityksessäni on osaamista ja resursseja rakentaa ja ylläpitää kumppanuuksia.", type: "kyky" }
+    ];
+
+    // Sekoita järjestys
+    questions.sort(() => Math.random() - 0.5);
+
+    const form = document.getElementById("testForm");
+
+    questions.forEach((q, index) => {
+      const div = document.createElement("div");
+      div.className = "question";
+      div.innerHTML = `<p>${index+1}. ${q.text}</p>`;
+      const grid = document.createElement("div");
+      grid.className = "grid";
+      for (let i = 1; i <= 5; i++) {
+        grid.innerHTML += `<label><input type="radio" name="q${index}" value="${i}" data-type="${q.type}"> ${i}</label>`;
+      }
+      div.appendChild(grid);
+      form.appendChild(div);
+    });
+
+    let chartInstance = null;
+
+    document.getElementById("submitBtn").addEventListener("click", () => {
+      const answers = document.querySelectorAll("input[type=radio]:checked");
+      if (answers.length < questions.length) {
+        alert("Vastaa kaikkiin kysymyksiin.");
+        return;
+      }
+
+      let haluScore = 0;
+      let kykyScore = 0;
+      answers.forEach(a => {
+        if (a.dataset.type === "halu") haluScore += parseInt(a.value);
+        if (a.dataset.type === "kyky") kykyScore += parseInt(a.value);
+      });
+
+      // Profiili
+      const haluHigh = haluScore >= 30; 
+      const kykyHigh = kykyScore >= 30;
+      let profile = "";
+      if (haluHigh && kykyHigh) {
+        profile = `<span class="highlight">Strateginen edelläkävijä</span><br>
+        Näkee tulevaisuuden mahdollisuudet ja pystyy toteuttamaan ne.<br>
+        Uskaltaa investoida, uudistaa ja kansainvälistyä.<br>
+        Hyvässä asemassa nopeaan kasvuun ja suunnannäyttäjän rooliin.`;
+      } else if (haluHigh && !kykyHigh) {
+        profile = `<span class="highlight">Innostunut uudistuja</span><br>
+        Erittäin motivoitunut, mutta resurssit ja osaaminen eivät vielä riitä.<br>
+        Tarvitsee tukea liiketoimintaosaamisen, rahoituksen ja verkostojen rakentamiseen.<br>
+        Potentiaalia kasvaa edelläkävijäksi.`;
+      } else if (!haluHigh && kykyHigh) {
+        profile = `<span class="highlight">Vakaa kehittäjä</span><br>
+        Kyvykäs ja hyvin resursoitu, mutta etenee harkiten ja riskit välttäen.<br>
+        Hyvä perusta, mutta tarvitsee usein ulkoisia kannustimia aktivoituakseen uusiin avauksiin.`;
+      } else {
+        profile = `<span class="highlight">Varautunut säilyttäjä</span><br>
+        Keskittyy pitämään nykytoiminnan vakaana ja riskittömänä.<br>
+        Saattaa suhtautua muutoksiin varauksella tai kokea ne uhkana.<br>
+        Voi tarvita aikaa, tukea ja luottamusta, jotta uskaltaa lähteä liikkeelle.`;
+      }
+
+      document.getElementById("result").style.display = "block";
+      document.getElementById("profileText").innerHTML =
+        `<p><strong>Pisteesi:</strong> Halu = ${haluScore}/60, Kyky = ${kykyScore}/60</p><p>${profile}</p>`;
+
+      // Scatter chart
+      const ctx = document.getElementById("chartCanvas").getContext("2d");
+
+      if (chartInstance) chartInstance.destroy();
+
+      chartInstance = new Chart(ctx, {
+        type: 'scatter',
+        data: {
+          datasets: [{
+            label: 'Sinun tuloksesi',
+            data: [{x: kykyScore, y: haluScore}],
+            backgroundColor: 'red',
+            pointRadius: 8
+          }]
+        },
+        options: {
+          scales: {
+            x: {
+              title: { display: true, text: 'Kyky' },
+              min: 0, max: 60,
+              grid: { color: '#eee' }
+            },
+            y: {
+              title: { display: true, text: 'Halu' },
+              min: 0, max: 60,
+              grid: { color: '#eee' }
+            }
+          },
+          plugins: {
+            legend: { display: false }
+          }
+        }
+      });
+    });
+  </script>
+
 </body>
 </html>
