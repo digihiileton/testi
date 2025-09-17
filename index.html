@@ -166,6 +166,9 @@
       const haluNorm = ((haluAvg - 1) / 4 * 10).toFixed(1);
       const kykyNorm = ((kykyAvg - 1) / 4 * 10).toFixed(1);
 
+      const haluOut = parseFloat(haluNorm).toFixed(1);
+      const kykyOut = parseFloat(kykyNorm).toFixed(1);
+
       // Profiililogiikka
       const haluTaso = alue(haluNorm);
       const kykyTaso = alue(kykyNorm);
@@ -214,7 +217,7 @@
 
       document.getElementById("result").style.display = "block";
       document.getElementById("profileText").innerHTML =
-        `<p><strong>Pisteesi:</strong> Muutoshalu = ${haluScore}/60, Muutoskyky = ${kykyScore}/60</p><p>${profile}</p>`;
+        `<p><strong>Pisteesi:</strong> Muutoshalu = ${haluOut}/10, Muutoskyky = ${kykyOut}/10</p><p>${profile}</p>`;
 
       // Scatter chart
       const ctx = document.getElementById("chartCanvas").getContext("2d");
@@ -277,4 +280,5 @@
 
 </body>
 </html>
+
 
