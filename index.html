@@ -1,18 +1,53 @@
-<!-- Tässä uusin versio -->
-
 <!DOCTYPE html>
 <html lang="fi">
 <head>
   <meta charset="UTF-8">
-  <title>Halu & Kyky -testi</title>
+  <title>Muutoshalu & Muutoskyky -testi</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; line-height: 1.5; }
-    h1 { margin-bottom: 20px; }
-    .question { margin-bottom: 20px; padding: 10px; border-bottom: 1px solid #ddd; }
-    .scale label { margin: 0 10px; }
-    button { margin-top: 20px; padding: 10px 20px; font-size: 16px; cursor: pointer; }
-    #result { margin-top: 30px; padding: 20px; border: 2px solid #333; border-radius: 10px; }
-    .highlight { font-weight: bold; font-size: 1.2em; color: darkblue; }
+    body { 
+      font-family: Arial, sans-serif; 
+      padding: 20px; 
+      line-height: 1.5; 
+      margin: 0;
+    }
+    h1 { margin-bottom: 10px; text-align: center; }
+    .intro {
+      max-width: 700px;
+      margin: 0 auto 30px auto;
+      text-align: center;
+      font-size: 1.1em;
+    }
+    form {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .question { 
+      margin-bottom: 15px; 
+      padding: 10px; 
+      border-bottom: 1px solid #ddd; 
+    }
+    .scale label { margin: 0 6px; font-size: 0.9em; }
+    button { 
+      margin: 30px auto; 
+      display: block; 
+      padding: 12px 24px; 
+      font-size: 16px; 
+      cursor: pointer; 
+    }
+    #result { 
+      margin-top: 30px; 
+      padding: 20px; 
+      border: 2px solid #333; 
+      border-radius: 10px; 
+      max-width: 800px; 
+      margin-left: auto; 
+      margin-right: auto; 
+    }
+    .highlight { 
+      font-weight: bold; 
+      font-size: 1.2em; 
+      color: darkblue; 
+    }
     .grid {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
@@ -20,13 +55,30 @@
       margin-top: 5px;
     }
     .grid label { text-align: center; }
-    canvas { margin-top: 20px; max-width: 500px; }
+    canvas { 
+      margin-top: 20px; 
+      max-width: 500px; 
+      width: 100%; 
+      height: auto; 
+    }
+
+    /* Mobiiliresponsiivisuus */
+    @media (max-width: 600px) {
+      .intro { font-size: 1em; padding: 0 10px; }
+      .grid { font-size: 0.8em; }
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
-  <h1>Halu & Kyky -testi</h1>
+  <h1>Muutoshalu & Muutoskyky -testi</h1>
+  <div class="intro">
+    <p>Tämä testi kartoittaa organisaatiosi muutoshalua ja muutoskykyä.</p>
+    <p>Vastaa 24 väittämään asteikolla:  
+      <br><strong>1 = täysin eri mieltä ... 5 = täysin samaa mieltä</strong></p>
+  </div>
+
   <form id="testForm"></form>
   <button type="button" id="submitBtn">Näytä tulos</button>
 
@@ -100,6 +152,14 @@
         if (a.dataset.type === "kyky") kykyScore += parseInt(a.value);
       });
 
+      // Keskiarvot
+      const haluAvg = haluScore / 12;
+      const kykyAvg = kykyScore / 12;
+
+      // Normalisointi 0–10
+      const haluNorm = (((haluAvg - 1) / 4) * 10).toFixed(1);
+      const kykyNorm = (((kykyAvg - 1) / 4) * 10).toFixed(1);
+
       // Profiili
       const haluHigh = haluScore >= 30; 
       const kykyHigh = kykyScore >= 30;
@@ -127,7 +187,8 @@
 
       document.getElementById("result").style.display = "block";
       document.getElementById("profileText").innerHTML =
-        `<p><strong>Pisteesi:</strong> Halu = ${haluScore}/60, Kyky = ${kykyScore}/60</p><p>${profile}</p>`;
+        `<p><strong>Pisteesi:</strong> Muutoshalu = ${haluScore}/60 (keskiarvo ${haluAvg.toFixed(2)} → ${haluNorm}/10), 
+        Muutoskyky = ${kykyScore}/60 (keskiarvo ${kykyAvg.toFixed(2)} → ${kykyNorm}/10)</p><p>${profile}</p>`;
 
       // Scatter chart
       const ctx = document.getElementById("chartCanvas").getContext("2d");
@@ -139,7 +200,7 @@
         data: {
           datasets: [{
             label: 'Sinun tuloksesi',
-            data: [{x: kykyScore, y: haluScore}],
+            data: [{x: kykyNorm, y: haluNorm}],
             backgroundColor: 'red',
             pointRadius: 8
           }]
@@ -147,24 +208,46 @@
         options: {
           scales: {
             x: {
-              title: { display: true, text: 'Kyky' },
-              min: 0, max: 60,
+              title: { display: true, text: 'Muutoskyky' },
+              min: 0, max: 10,
               grid: { color: '#eee' }
             },
             y: {
-              title: { display: true, text: 'Halu' },
-              min: 0, max: 60,
+              title: { display: true, text: 'Muutoshalu' },
+              min: 0, max: 10,
               grid: { color: '#eee' }
             }
           },
           plugins: {
-            legend: { display: false }
+            legend: { display: false },
+            tooltip: { enabled: true }
           }
-        }
+        },
+        plugins: [{
+          id: 'midLines',
+          afterDraw: (chart) => {
+            const ctx = chart.ctx;
+            const xAxis = chart.scales.x;
+            const yAxis = chart.scales.y;
+            ctx.save();
+            ctx.strokeStyle = '#888';
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            // Pystylinja keskelle
+            const midX = xAxis.getPixelForValue(5);
+            ctx.moveTo(midX, yAxis.top);
+            ctx.lineTo(midX, yAxis.bottom);
+            // Vaakalinja keskelle
+            const midY = yAxis.getPixelForValue(5);
+            ctx.moveTo(xAxis.left, midY);
+            ctx.lineTo(xAxis.right, midY);
+            ctx.stroke();
+            ctx.restore();
+          }
+        }]
       });
     });
   </script>
 
 </body>
 </html>
-
